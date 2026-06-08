@@ -18,7 +18,6 @@ const port = process.env.PORT || 5000;
 
 // CORS CONFIG
 const allowedOrigins = [
-  'http://localhost:5173',
   'https://project-jade-rho-30.vercel.app/',
 ];
 
