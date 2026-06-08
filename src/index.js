@@ -20,6 +20,13 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.get('/', (_req, res) => {
+  return res.json({
+    message: 'Server is running',
+    health: '/api/health'
+  });
+});
+
 app.get('/api/health', async (_req, res) => {
   const users = await prisma.user.count();
   return res.json({ ok: true, users });
