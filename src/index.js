@@ -17,14 +17,19 @@ const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 
 // CORS CONFIG
+const normalizeOrigin = (value) => (value ? value.replace(/\/$/, '') : value);
+
 const allowedOrigins = [
-  'https://project-jade-rho-30.vercel.app/',
-];
+  normalizeOrigin(process.env.CLIENT_URL),
+  'http://localhost:5173',
+].filter(Boolean);
+
+const isAllowedOrigin = (origin) => allowedOrigins.includes(normalizeOrigin(origin));
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
         callback(new Error(`Origin ${origin} not allowed by CORS`));
@@ -94,5 +99,6 @@ io.on('connection', (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
+  console.log(`Health check: http://localhost:${port}/api/health`);
 });
