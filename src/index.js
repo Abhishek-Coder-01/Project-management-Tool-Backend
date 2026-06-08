@@ -16,7 +16,25 @@ const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+// CORS CONFIG
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://project-management-tool-frontend-nine.vercel.app/',
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
+    credentials: true
+  })
+);
+
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -39,18 +57,25 @@ app.use('/api/notifications', notificationRoutes);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
-    methods: ['GET', 'POST']
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
+
 setIO(io);
 
 io.use((socket, next) => {
   try {
     const token = socket.handshake.auth?.token;
-    if (!token) return next(new Error('Unauthorized'));
+
+    if (!token) {
+      return next(new Error('Unauthorized'));
+    }
+
     const decoded = verifyToken(token);
     socket.userId = decoded.userId;
+
     next();
   } catch (error) {
     next(new Error('Unauthorized'));
@@ -70,5 +95,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
