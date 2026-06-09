@@ -22,7 +22,7 @@ const normalizeOrigin = (value) => (value ? value.replace(/\/$/, '') : value);
 const allowedOrigins = [
   normalizeOrigin(process.env.CLIENT_URL),
   'http://localhost:5173',
-  'https://project-jade-rho-30.vercel.app'
+  'https://project-management-tool-frontend-beta.vercel.app/'
 ].filter(Boolean);
 
 const isAllowedOrigin = (origin) => allowedOrigins.includes(normalizeOrigin(origin));
