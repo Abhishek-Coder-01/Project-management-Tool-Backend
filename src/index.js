@@ -17,7 +17,7 @@ const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 
 // CORS CONFIG
-const normalizeOrigin = (value) => (value ? value.replace(/\/$/, '') : value);
+const normalizeOrigin = (value) => (value ? value.trim().replace(/\/$/, '').toLowerCase() : value);
 
 const allowedOrigins = new Set(
   [

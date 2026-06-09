@@ -6,7 +6,8 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "db:push": "prisma db push",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "build": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.17.0",
