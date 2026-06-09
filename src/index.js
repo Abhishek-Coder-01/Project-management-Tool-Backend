@@ -19,26 +19,40 @@ const port = process.env.PORT || 5000;
 // CORS CONFIG
 const normalizeOrigin = (value) => (value ? value.replace(/\/$/, '') : value);
 
-const allowedOrigins = [
-  normalizeOrigin(process.env.CLIENT_URL),
-  'http://localhost:5173',
-  'https://project-management-tool-frontend-beta.vercel.app/'
-].filter(Boolean);
-
-const isAllowedOrigin = (origin) => allowedOrigins.includes(normalizeOrigin(origin));
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || isAllowedOrigin(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
-      }
-    },
-    credentials: true
-  })
+const allowedOrigins = new Set(
+  [
+    process.env.CLIENT_URL,
+    'http://localhost:5173',
+    'https://project-management-tool-frontend-beta.vercel.app',
+    'https://project-management-tool-frontend-beta.vercel.app/'
+  ]
+    .filter(Boolean)
+    .map(normalizeOrigin)
 );
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (allowedOrigins.has(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`Blocked CORS origin: ${origin}`);
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan('dev'));
@@ -62,8 +76,8 @@ app.use('/api/notifications', notificationRoutes);
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST'],
+    origin: [...allowedOrigins],
+    methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
   }
 });
